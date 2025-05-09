@@ -11,6 +11,8 @@ var (
 	ErrAlgorithmUnknown = errors.New("algorithm is not registered")
 	// ErrDigestInvalid is returned when parsing an invalid digest string or using an undefined digest.
 	ErrDigestInvalid = errors.New("digest is invalid")
+	// ErrEncodeInterfaceInvalid is returned when trying to use an invalid encoding interface.
+	ErrEncodeInterfaceInvalid = errors.New("invalid encoding interface")
 	// ErrEncodingInvalid is returned when trying to create a digest with an invalid hex value.
 	ErrEncodingInvalid = errors.New("encoding contains invalid characters or the wrong length for the algorithm")
 	// ErrHashFunctionInvalid is returned when the hash function is nil or does not return a valid hash.
