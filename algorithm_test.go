@@ -13,42 +13,55 @@ func TestAlgorithmRegister(t *testing.T) {
 	tt := []struct {
 		name  string
 		alg   string
+		enc   Encoder
 		newFn func() hash.Hash
 		err   error
 	}{
 		{
 			name:  "sha384",
 			alg:   "sha384",
+			enc:   EncodeHex{Len: 96},
 			newFn: sha512.New384,
 		},
 		{
 			name:  "existing",
 			alg:   "sha256",
+			enc:   EncodeHex{Len: 64},
 			newFn: sha512.New,
 			err:   ErrAlgorithmExists,
 		},
 		{
 			name:  "invalid name",
 			alg:   "invalid*name",
+			enc:   EncodeHex{Len: 123},
 			newFn: sha256.New,
 			err:   ErrAlgorithmInvalidName,
 		},
 		{
 			name:  "nil hash fn",
 			alg:   "nil-hash",
+			enc:   EncodeHex{Len: 64},
 			newFn: nil,
 			err:   ErrHashFunctionInvalid,
 		},
 		{
+			name:  "nil enc fn",
+			alg:   "nil-enc",
+			enc:   nil,
+			newFn: sha256.New,
+			err:   ErrEncodeInterfaceInvalid,
+		},
+		{
 			name:  "nil hash fn return",
 			alg:   "nil-hash-ret",
+			enc:   EncodeHex{Len: 64},
 			newFn: func() hash.Hash { return nil },
 			err:   ErrHashFunctionInvalid,
 		},
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			a, err := AlgorithmRegister(tc.alg, tc.newFn)
+			a, err := AlgorithmRegister(tc.alg, tc.enc, tc.newFn)
 			if tc.err != nil {
 				if !errors.Is(err, tc.err) {
 					t.Errorf("expected err %v, received %v", tc.err, err)

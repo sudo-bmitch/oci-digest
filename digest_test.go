@@ -9,6 +9,9 @@ import (
 	"testing"
 )
 
+// Verify interface implementation
+var _ Digester = &digester{}
+
 func TestNewDigest(t *testing.T) {
 	emptyJson := sha256.New()
 	_, err := emptyJson.Write([]byte("{}"))
@@ -261,11 +264,11 @@ func TestEqual(t *testing.T) {
 			name: "sha256-same",
 			a: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 			b: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 			eq: true,
 		},
@@ -273,22 +276,22 @@ func TestEqual(t *testing.T) {
 			name: "sha256-encoding-different",
 			a: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 			b: Digest{
 				alg: SHA256,
-				hex: "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+				enc: "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
 			},
 		},
 		{
 			name: "alg-different",
 			a: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 			b: Digest{
 				alg: SHA512,
-				hex: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+				enc: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 			},
 		},
 	}
@@ -316,7 +319,7 @@ func TestIsZero(t *testing.T) {
 			name: "sha256",
 			d: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 			zero: false,
 		},
@@ -345,7 +348,7 @@ func TestMarshal(t *testing.T) {
 			name: "invalid",
 			d: Digest{
 				alg: SHA256,
-				hex: "",
+				enc: "",
 			},
 			err: ErrDigestInvalid,
 		},
@@ -353,7 +356,7 @@ func TestMarshal(t *testing.T) {
 			name: "sha256-empty",
 			d: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 			expect: "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 		},
@@ -361,7 +364,7 @@ func TestMarshal(t *testing.T) {
 			name: "sha512-empty",
 			d: Digest{
 				alg: SHA512,
-				hex: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+				enc: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 			},
 			expect: "sha512:cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 		},
@@ -400,7 +403,7 @@ func TestMarshalJSON(t *testing.T) {
 			name: "invalid",
 			d: Digest{
 				alg: SHA256,
-				hex: "",
+				enc: "",
 			},
 			err: ErrDigestInvalid,
 		},
@@ -408,7 +411,7 @@ func TestMarshalJSON(t *testing.T) {
 			name: "sha256-empty",
 			d: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 			expect: `"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"`,
 		},
@@ -416,7 +419,7 @@ func TestMarshalJSON(t *testing.T) {
 			name: "sha512-empty",
 			d: Digest{
 				alg: SHA512,
-				hex: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+				enc: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 			},
 			expect: `"sha512:cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"`,
 		},
@@ -460,7 +463,7 @@ func TestUnmarshal(t *testing.T) {
 			in:   "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			expect: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 		},
 		{
@@ -468,7 +471,7 @@ func TestUnmarshal(t *testing.T) {
 			in:   "sha512:cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 			expect: Digest{
 				alg: SHA512,
-				hex: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+				enc: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 			},
 		},
 	}
@@ -513,7 +516,7 @@ func TestUnmarshalJSON(t *testing.T) {
 			in:   `"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"`,
 			expect: Digest{
 				alg: SHA256,
-				hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				enc: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 			},
 		},
 		{
@@ -521,7 +524,7 @@ func TestUnmarshalJSON(t *testing.T) {
 			in:   `"sha512:cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"`,
 			expect: Digest{
 				alg: SHA512,
-				hex: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+				enc: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 			},
 		},
 	}

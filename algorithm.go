@@ -13,6 +13,7 @@ import (
 type Algorithm struct {
 	name  string
 	size  int
+	enc   Encoder
 	newFn func() hash.Hash
 }
 
@@ -26,8 +27,8 @@ var (
 func init() {
 	// Ignore errors, do not panic.
 	// Predefined algorithms would be invalid if they cannot be registered for some reason.
-	SHA256, _ = AlgorithmRegister("sha256", sha256.New)
-	SHA512, _ = AlgorithmRegister("sha512", sha512.New)
+	SHA256, _ = AlgorithmRegister("sha256", EncodeHex{Len: 64}, sha256.New)
+	SHA512, _ = AlgorithmRegister("sha512", EncodeHex{Len: 128}, sha512.New)
 	Canonical = SHA256
 }
 
@@ -41,7 +42,7 @@ func AlgorithmLookup(name string) (Algorithm, error) {
 	return Algorithm{}, fmt.Errorf("%w: %s", ErrAlgorithmUnknown, name)
 }
 
-func AlgorithmRegister(name string, newFn func() hash.Hash) (Algorithm, error) {
+func AlgorithmRegister(name string, enc Encoder, newFn func() hash.Hash) (Algorithm, error) {
 	algorithmsMu.Lock()
 	defer algorithmsMu.Unlock()
 
@@ -50,6 +51,9 @@ func AlgorithmRegister(name string, newFn func() hash.Hash) (Algorithm, error) {
 	}
 	if !algorithmRegexp.MatchString(name) {
 		return Algorithm{}, fmt.Errorf("%w: %s", ErrAlgorithmInvalidName, name)
+	}
+	if enc == nil {
+		return Algorithm{}, fmt.Errorf("%w: %s", ErrEncodeInterfaceInvalid, name)
 	}
 	if newFn == nil {
 		return Algorithm{}, fmt.Errorf("%w: %s", ErrHashFunctionInvalid, name)
@@ -65,6 +69,7 @@ func AlgorithmRegister(name string, newFn func() hash.Hash) (Algorithm, error) {
 	alg := Algorithm{
 		name:  name,
 		size:  size,
+		enc:   enc,
 		newFn: newFn,
 	}
 	algorithms[name] = alg
@@ -79,6 +84,13 @@ func (a Algorithm) Digester() (Digester, error) {
 		alg:  a,
 		hash: a.newFn(),
 	}, nil
+}
+
+func (a Algorithm) Encode(p []byte) (string, error) {
+	if a.enc == nil {
+		return "", ErrEncodeInterfaceInvalid
+	}
+	return a.enc.Encode(p)
 }
 
 func (a Algorithm) FromBytes(p []byte) (Digest, error) {
@@ -128,6 +140,9 @@ func (a Algorithm) validate() error {
 	}
 	if a.newFn == nil {
 		return ErrHashFunctionInvalid
+	}
+	if a.enc == nil {
+		return ErrEncodeInterfaceInvalid
 	}
 	return nil
 }

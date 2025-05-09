@@ -9,26 +9,29 @@ import (
 
 type Digest struct {
 	alg Algorithm
-	hex string
+	enc string
 }
 
 var (
 	DigestRegexp         = regexp.MustCompile(`[a-z0-9]+(?:[.+_-][a-z0-9]+)*:[a-zA-Z0-9=_-]+`)
 	DigestRegexpAnchored = regexp.MustCompile(`^` + DigestRegexp.String() + `$`)
 	DigestRegexpParts    = regexp.MustCompile(`^([a-z0-9]+(?:[.+_-][a-z0-9]+)*):([a-zA-Z0-9=_-]+)$`)
-	encodingRegexp       = regexp.MustCompile(`^[a-zA-Z0-9=_-]+$`)
 )
 
 func NewDigest(alg Algorithm, h hash.Hash) (Digest, error) {
-	if alg.name == "" {
+	if alg.name == "" || alg.enc == nil {
 		return Digest{}, ErrAlgorithmInvalidName
 	}
 	if h == nil || h.Size() != alg.size {
 		return Digest{}, ErrHashInterfaceInvalid
 	}
+	enc, err := alg.enc.Encode(h.Sum(nil))
+	if err != nil {
+		return Digest{}, err
+	}
 	return Digest{
 		alg: alg,
-		hex: fmt.Sprintf("%x", h.Sum(nil)),
+		enc: enc,
 	}, nil
 }
 
@@ -36,12 +39,12 @@ func NewDigestFromEncoded(alg Algorithm, encoded string) (Digest, error) {
 	if alg.name == "" {
 		return Digest{}, ErrAlgorithmInvalidName
 	}
-	if len(encoded) != alg.size*2 || !encodingRegexp.MatchString(encoded) {
+	if alg.enc == nil || !alg.enc.Validate(encoded) {
 		return Digest{}, fmt.Errorf("%w: %s", ErrEncodingInvalid, encoded)
 	}
 	return Digest{
 		alg: alg,
-		hex: encoded,
+		enc: encoded,
 	}, nil
 }
 
@@ -69,12 +72,12 @@ func Parse(s string) (Digest, error) {
 	if err != nil {
 		return Digest{}, err
 	}
-	if len(parts[2]) != alg.size*2 || !encodingRegexp.MatchString(parts[2]) {
+	if alg.enc == nil || !alg.enc.Validate(parts[2]) {
 		return Digest{}, fmt.Errorf("%w: %s", ErrEncodingInvalid, parts[2])
 	}
 	return Digest{
 		alg: alg,
-		hex: parts[2],
+		enc: parts[2],
 	}, nil
 }
 
@@ -86,22 +89,22 @@ func (d Digest) AppendText(b []byte) ([]byte, error) {
 	if d.IsZero() {
 		return b, nil
 	}
-	if d.alg.name == "" || d.hex == "" {
+	if d.alg.name == "" || d.enc == "" {
 		return b, ErrDigestInvalid
 	}
-	return fmt.Appendf(b, "%s:%s", d.alg.name, d.hex), nil
+	return fmt.Appendf(b, "%s:%s", d.alg.name, d.enc), nil
 }
 
 func (d Digest) Encoded() string {
-	return d.hex
+	return d.enc
 }
 
 func (d Digest) Equal(cmp Digest) bool {
-	return d.alg.name == cmp.alg.name && d.hex == cmp.hex
+	return d.alg.name == cmp.alg.name && d.enc == cmp.enc
 }
 
 func (d Digest) IsZero() bool {
-	return d.alg.name == "" && d.hex == ""
+	return d.alg.name == "" && d.enc == ""
 }
 
 func (d Digest) MarshalText() (text []byte, err error) {
@@ -109,10 +112,10 @@ func (d Digest) MarshalText() (text []byte, err error) {
 }
 
 func (d Digest) String() string {
-	if d.alg.name == "" || d.hex == "" {
+	if d.alg.name == "" || d.enc == "" {
 		return ""
 	}
-	return fmt.Sprintf("%s:%s", d.alg.name, d.hex)
+	return fmt.Sprintf("%s:%s", d.alg.name, d.enc)
 }
 
 func (d *Digest) UnmarshalText(text []byte) error {
@@ -136,9 +139,10 @@ type digester struct {
 }
 
 func (d *digester) Digest() Digest {
+	enc, _ := d.alg.enc.Encode(d.hash.Sum(nil))
 	return Digest{
 		alg: d.alg,
-		hex: fmt.Sprintf("%x", d.hash.Sum(nil)),
+		enc: enc,
 	}
 }
 
