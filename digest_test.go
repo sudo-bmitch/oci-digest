@@ -13,8 +13,8 @@ import (
 var _ Digester = &digester{}
 
 func TestNewDigest(t *testing.T) {
-	emptyJson := sha256.New()
-	_, err := emptyJson.Write([]byte("{}"))
+	emptyJSON := sha256.New()
+	_, err := emptyJSON.Write([]byte("{}"))
 	if err != nil {
 		t.Fatalf("failed to populate emptyJson hash: %v", err)
 	}
@@ -43,7 +43,7 @@ func TestNewDigest(t *testing.T) {
 		{
 			name: "sha256-empty-json",
 			alg:  SHA256,
-			h:    emptyJson,
+			h:    emptyJSON,
 			out:  "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
 		},
 	}
