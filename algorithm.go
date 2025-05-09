@@ -10,6 +10,8 @@ import (
 	"sync"
 )
 
+// Algorithm specifies an algorithm used to generate a digest.
+// Algorithms each have a name, size, encoder, and a hash function.
 type Algorithm struct {
 	name  string
 	size  int
@@ -18,10 +20,12 @@ type Algorithm struct {
 }
 
 var (
-	algorithms                = map[string]Algorithm{}
-	algorithmsMu              sync.RWMutex
-	algorithmRegexp           = regexp.MustCompile(`^[a-z0-9]+([+._-][a-z0-9]+)*$`)
-	Canonical, SHA256, SHA512 Algorithm
+	algorithms      = map[string]Algorithm{}
+	algorithmsMu    sync.RWMutex
+	algorithmRegexp = regexp.MustCompile(`^[a-z0-9]+([+._-][a-z0-9]+)*$`)
+	Canonical       Algorithm // Canonical is the default hashing algorithm, currently set to [SHA256].
+	SHA256          Algorithm // SHA256 defines the registered sha256 digester based on [crypto/sha256].
+	SHA512          Algorithm // SHA512 defines the registered sha512 digester based on [crypto/sha512].
 )
 
 func init() {
@@ -32,6 +36,7 @@ func init() {
 	Canonical = SHA256
 }
 
+// AlgorithmLookup is used to get a previously registered [Algorithm].
 func AlgorithmLookup(name string) (Algorithm, error) {
 	algorithmsMu.RLock()
 	defer algorithmsMu.RUnlock()
@@ -42,6 +47,10 @@ func AlgorithmLookup(name string) (Algorithm, error) {
 	return Algorithm{}, fmt.Errorf("%w: %s", ErrAlgorithmUnknown, name)
 }
 
+// AlgorithmRegister is used to register new hash algorithms.
+// Attempting to register an already registered algorithm will fail.
+// The name must follow the regexp "[a-z0-9]+([+._-][a-z0-9]+)*".
+// The encoder and hash function are also verified to be valid interfaces.
 func AlgorithmRegister(name string, enc Encoder, newFn func() hash.Hash) (Algorithm, error) {
 	algorithmsMu.Lock()
 	defer algorithmsMu.Unlock()
@@ -76,6 +85,7 @@ func AlgorithmRegister(name string, enc Encoder, newFn func() hash.Hash) (Algori
 	return alg, nil
 }
 
+// Digester creates a new [Digester] for the algorithm.
 func (a Algorithm) Digester() (Digester, error) {
 	if err := a.validate(); err != nil {
 		return nil, err
@@ -86,6 +96,7 @@ func (a Algorithm) Digester() (Digester, error) {
 	}, nil
 }
 
+// Encode converts the byte slice hash sum to an encoded string for a digest.
 func (a Algorithm) Encode(p []byte) (string, error) {
 	if a.enc == nil {
 		return "", ErrEncodeInterfaceInvalid
@@ -93,6 +104,8 @@ func (a Algorithm) Encode(p []byte) (string, error) {
 	return a.enc.Encode(p)
 }
 
+// FromBytes generates a digest on the input byte slice using the algorithm and returns a [Digest].
+// This will fail if the algorithm is invalid.
 func (a Algorithm) FromBytes(p []byte) (Digest, error) {
 	dr, err := a.Digester()
 	if err != nil {
@@ -104,6 +117,8 @@ func (a Algorithm) FromBytes(p []byte) (Digest, error) {
 	return dr.Digest(), nil
 }
 
+// FromReader generates a digest on the input reader using the algorithm and returns a [Digest].
+// This will fail if the algorithm is invalid or on read errors.
 func (a Algorithm) FromReader(rd io.Reader) (Digest, error) {
 	dr, err := a.Digester()
 	if err != nil {
@@ -115,10 +130,14 @@ func (a Algorithm) FromReader(rd io.Reader) (Digest, error) {
 	return dr.Digest(), nil
 }
 
+// FromString generates a digest on the input string using the algorithm and returns a [Digest].
+// This will fail if the algorithm is invalid.
 func (a Algorithm) FromString(s string) (Digest, error) {
 	return a.FromBytes([]byte(s))
 }
 
+// Hash returns a new [hash.Hash] for the algorithm.
+// nil is returned if the algorithm is invalid.
 func (a Algorithm) Hash() hash.Hash {
 	if a.newFn == nil {
 		return nil
@@ -126,14 +145,17 @@ func (a Algorithm) Hash() hash.Hash {
 	return a.newFn()
 }
 
+// Size returns the detected output byte size of the hash implementation.
 func (a Algorithm) Size() int {
 	return a.size
 }
 
+// String returns the name of the digest algorithm.
 func (a Algorithm) String() string {
 	return a.name
 }
 
+// validate is used to verify an algorithm before it is used.
 func (a Algorithm) validate() error {
 	if a.name == "" {
 		return ErrAlgorithmInvalidName
