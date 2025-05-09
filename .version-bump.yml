@@ -1,0 +1,97 @@
+files:
+  ".github/workflows/*.yml":
+    processors:
+      - gha-uses-vx
+      - gha-uses-semver
+      - gha-uses-commit
+  "Makefile":
+    processors:
+      - makefile-markdown-lint
+      - makefile-staticcheck
+
+x-processor-tmpl:
+  git-commit: &git-commit
+    key: "{{ .SourceArgs.url }}:{{ .SourceArgs.ref }}"
+    scan: "regexp"
+    source: "git-commit"
+    filter:
+      expr: "^{{ .SourceArgs.ref }}$"
+  git-tag-semver: &git-tag-semver
+    key: "{{ .SourceArgs.url }}"
+    scan: "regexp"
+    source: "git-tag"
+    filter:
+      expr: '^v?\d+\.\d+\.\d+$'
+    sort:
+      method: "semver"
+  registry-digest: &registry-digest
+    key: "{{ .SourceArgs.image }}"
+    scan: "regexp"
+    source: "registry-digest"
+  registry-tag-semver: &registry-tag-semver
+    key: "{{ .SourceArgs.repo }}"
+    scan: "regexp"
+    source: "registry-tag"
+    filter:
+      expr: '^v?\d+\.\d+\.\d+$'
+    sort:
+      method: "semver"
+
+processors:
+  gha-uses-vx:
+    <<: *git-tag-semver
+    scanArgs:
+      regexp: '^\s+-?\s+uses: (?P<Repo>[^@/]+/[^@/]+)[^@]*@(?P<Commit>[0-9a-f]+)\s+#\s+(?P<Version>v?\d+)\s*$'
+    sourceArgs:
+      url: "https://github.com/{{ .ScanMatch.Repo }}.git"
+    filter:
+      expr: '^v?\d+$'
+  gha-uses-semver:
+    <<: *git-tag-semver
+    scanArgs:
+      regexp: '^\s+-?\s+uses: (?P<Repo>[^@/]+/[^@/]+)[^@]*@(?P<Commit>[0-9a-f]+)\s+#\s+(?P<Version>v?\d+\.\d+\.\d+)\s*$'
+    sourceArgs:
+      url: "https://github.com/{{ .ScanMatch.Repo }}.git"
+  gha-uses-commit:
+    <<: *git-commit
+    scanArgs:
+      regexp: '^\s+-?\s+uses: (?P<Repo>[^@/]+/[^@/]+)[^@]*@(?P<Version>[0-9a-f]+)\s+#\s+(?P<Ref>[\w\d\.]+)\s*$'
+    sourceArgs:
+      url: "https://github.com/{{ .ScanMatch.Repo }}.git"
+      ref: "{{ .ScanMatch.Ref }}"
+
+  makefile-markdown-lint:
+    <<: *registry-tag-semver
+    scanArgs:
+      regexp: '^MARKDOWN_LINT_VER\?=(?P<Version>v?[0-9\.]+)\s*$'
+    sourceArgs:
+      repo: "docker.io/davidanson/markdownlint-cli2"
+  makefile-staticcheck:
+    <<: *git-tag-semver
+    scanArgs:
+      regexp: '^STATICCHECK_VER\?=(?P<Version>v?[0-9\.]+)\s*$'
+    sourceArgs:
+      url: "https://github.com/dominikh/go-tools.git"
+    filter:
+      # repo also has dated tags, ignore versions without a preceding "v"
+      expr: '^v\d+\.\d+\.\d+$'
+
+scans:
+  regexp:
+    type: "regexp"
+
+sources:
+  git-commit:
+    type: "git"
+    args:
+      type: "commit"
+  git-tag:
+    type: "git"
+    args:
+      type: "tag"
+  registry-digest:
+    type: "registry"
+  registry-tag:
+    type: "registry"
+    args:
+      type: "tag"
