@@ -10,7 +10,7 @@ import (
 )
 
 // Verify interface implementation
-var _ Digester = &digester{}
+var _ Digester = Writer{}
 
 func TestNewDigest(t *testing.T) {
 	emptyJSON := sha256.New()
