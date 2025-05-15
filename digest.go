@@ -161,26 +161,5 @@ func (d *Digest) UnmarshalText(text []byte) error {
 type Digester interface {
 	io.Writer
 	Hash() hash.Hash
-	Digest() Digest
-}
-
-type digester struct {
-	alg  Algorithm
-	hash hash.Hash
-}
-
-func (d *digester) Digest() Digest {
-	enc, _ := d.alg.enc.Encode(d.hash.Sum(nil))
-	return Digest{
-		alg: d.alg,
-		enc: enc,
-	}
-}
-
-func (d *digester) Hash() hash.Hash {
-	return d.hash
-}
-
-func (d *digester) Write(p []byte) (n int, err error) {
-	return d.hash.Write(p)
+	Digest() (Digest, error)
 }

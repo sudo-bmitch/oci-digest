@@ -169,7 +169,11 @@ func TestAlgorithmDigest(t *testing.T) {
 				if err != nil {
 					t.Fatalf("failed to write to digester: %v", err)
 				}
-				out := d.Digest().String()
+				dig, err := d.Digest()
+				if err != nil {
+					t.Fatalf("unexpected error from digest: %v", err)
+				}
+				out := dig.String()
 				if out != tc.expect {
 					t.Errorf("expected %s, received %s", tc.expect, out)
 				}

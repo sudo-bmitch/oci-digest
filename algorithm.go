@@ -90,10 +90,7 @@ func (a Algorithm) Digester() (Digester, error) {
 	if err := a.validate(); err != nil {
 		return nil, err
 	}
-	return &digester{
-		alg:  a,
-		hash: a.newFn(),
-	}, nil
+	return NewWriter(nil, a), nil
 }
 
 // Encode converts the byte slice hash sum to an encoded string for a digest.
@@ -114,7 +111,7 @@ func (a Algorithm) FromBytes(p []byte) (Digest, error) {
 	if _, err := dr.Write(p); err != nil {
 		return Digest{}, err
 	}
-	return dr.Digest(), nil
+	return dr.Digest()
 }
 
 // FromReader generates a digest on the input reader using the algorithm and returns a [Digest].
@@ -127,7 +124,7 @@ func (a Algorithm) FromReader(rd io.Reader) (Digest, error) {
 	if _, err := io.Copy(dr, rd); err != nil {
 		return Digest{}, err
 	}
-	return dr.Digest(), nil
+	return dr.Digest()
 }
 
 // FromString generates a digest on the input string using the algorithm and returns a [Digest].
