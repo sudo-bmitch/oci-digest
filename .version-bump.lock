@@ -2,5 +2,5 @@
 {"name":"gha-uses-commit","key":"https://github.com/actions/setup-go.git:v5.5.0","version":"d35c59abb061a4a6fb18e82ac0862c26744d6ab5"}
 {"name":"gha-uses-semver","key":"https://github.com/actions/checkout.git","version":"v4.2.2"}
 {"name":"gha-uses-semver","key":"https://github.com/actions/setup-go.git","version":"v5.5.0"}
-{"name":"makefile-markdown-lint","key":"docker.io/davidanson/markdownlint-cli2","version":"v0.17.2"}
+{"name":"makefile-markdown-lint","key":"docker.io/davidanson/markdownlint-cli2","version":"v0.18.1"}
 {"name":"makefile-staticcheck","key":"https://github.com/dominikh/go-tools.git","version":"v0.6.1"}
