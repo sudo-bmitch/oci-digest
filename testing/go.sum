@@ -1,0 +1,8 @@
+github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1 h1:+VexzzkMLb1tnvpuQdGT/DicIRW7MN8ozsXqBMgp0Hk=
+github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1/go.mod h1:TiCD2a1pcmjd7YnhGH0f/zKNcCD06B029pHhzV23c2M=
+github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
+github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
+github.com/opencontainers/go-digest v1.0.1-0.20250116041648-1e56c6daea3b h1:0XWQwEHfTQ7zrjFjaOnKrU8z9UVdv1A4uGU39phmwNI=
+github.com/opencontainers/go-digest v1.0.1-0.20250116041648-1e56c6daea3b/go.mod h1:RqnyioA3pIEZMkSbOIcrw32YSgETfn/VrLuEikEdPNU=
+github.com/sudo-bmitch/oci-digest v0.0.0-20250515204613-a89494cee0f6 h1:8gjhX/jzKrABarH3SWVPLFTgTwWI/AQa/FU2ORMvxZQ=
+github.com/sudo-bmitch/oci-digest v0.0.0-20250515204613-a89494cee0f6/go.mod h1:TawA3vghusurkiqWFZ07e3ynLpKcZXaH/RkohKCxPms=

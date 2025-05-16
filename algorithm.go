@@ -38,6 +38,14 @@ func init() {
 
 // AlgorithmLookup is used to get a previously registered [Algorithm].
 func AlgorithmLookup(name string) (Algorithm, error) {
+	// skip the lock for registered algorithms
+	switch name {
+	case "sha256":
+		return SHA256, nil
+	case "sha512":
+		return SHA512, nil
+	}
+
 	algorithmsMu.RLock()
 	defer algorithmsMu.RUnlock()
 

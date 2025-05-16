@@ -5,6 +5,7 @@ import (
 	"hash"
 	"io"
 	"regexp"
+	"strings"
 )
 
 // Digest is the combination of an algorithm and the encoded hash value.
@@ -76,20 +77,20 @@ func Parse(s string) (Digest, error) {
 	if s == "" {
 		return Digest{}, nil
 	}
-	parts := DigestRegexpParts.FindStringSubmatch(s)
-	if len(parts) != 3 {
+	algPart, encPart, ok := strings.Cut(s, ":")
+	if !ok {
 		return Digest{}, fmt.Errorf("%w: %s", ErrDigestInvalid, s)
 	}
-	alg, err := AlgorithmLookup(parts[1])
+	alg, err := AlgorithmLookup(algPart)
 	if err != nil {
 		return Digest{}, err
 	}
-	if alg.enc == nil || !alg.enc.Validate(parts[2]) {
-		return Digest{}, fmt.Errorf("%w: %s", ErrEncodingInvalid, parts[2])
+	if alg.enc == nil || !alg.enc.Validate(encPart) {
+		return Digest{}, fmt.Errorf("%w: %s", ErrEncodingInvalid, encPart)
 	}
 	return Digest{
 		alg: alg,
-		enc: parts[2],
+		enc: encPart,
 	}, nil
 }
 
