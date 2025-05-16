@@ -197,7 +197,7 @@ func TestParse(t *testing.T) {
 		{
 			name: "invalid-hex",
 			s:    "sha256:e3b0c4*298fc1c149afb@4c8996fb92427^e41e4649b934c$495991b7852b85!",
-			err:  ErrDigestInvalid,
+			err:  ErrEncodingInvalid,
 		},
 		{
 			name: "unknown-alg",
