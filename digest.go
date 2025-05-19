@@ -10,7 +10,7 @@ import (
 
 // Digest is the combination of an algorithm and the encoded hash value.
 type Digest struct {
-	alg Algorithm
+	alg string
 	enc string
 }
 
@@ -34,7 +34,7 @@ func NewDigest(alg Algorithm, h hash.Hash) (Digest, error) {
 		return Digest{}, err
 	}
 	return Digest{
-		alg: alg,
+		alg: alg.name,
 		enc: enc,
 	}, nil
 }
@@ -49,7 +49,7 @@ func NewDigestFromEncoded(alg Algorithm, encoded string) (Digest, error) {
 		return Digest{}, fmt.Errorf("%w: %s", ErrEncodingInvalid, encoded)
 	}
 	return Digest{
-		alg: alg,
+		alg: alg.name,
 		enc: encoded,
 	}, nil
 }
@@ -89,14 +89,16 @@ func Parse(s string) (Digest, error) {
 		return Digest{}, fmt.Errorf("%w: %s", ErrEncodingInvalid, encPart)
 	}
 	return Digest{
-		alg: alg,
+		alg: alg.name,
 		enc: encPart,
 	}, nil
 }
 
 // Algorithm returns the [Algorithm] portion of the digest.
 func (d Digest) Algorithm() Algorithm {
-	return d.alg
+	alg, _ := AlgorithmLookup(d.alg)
+	// any lookup failure will return a zero value
+	return alg
 }
 
 // AppendText is used to output the current value of the digest to the byte slice.
@@ -110,10 +112,10 @@ func (d Digest) AppendText(b []byte) ([]byte, error) {
 		}
 		return b, nil
 	}
-	if d.alg.name == "" || d.enc == "" {
+	if d.alg == "" || d.enc == "" {
 		return b, ErrDigestInvalid
 	}
-	return fmt.Appendf(b, "%s:%s", d.alg.name, d.enc), nil
+	return fmt.Appendf(b, "%s:%s", d.alg, d.enc), nil
 }
 
 // Encoded returns the encoded portion of the digest.
@@ -123,12 +125,12 @@ func (d Digest) Encoded() string {
 
 // Equal returns true if two digests have the same algorithm name and encoded value.
 func (d Digest) Equal(cmp Digest) bool {
-	return d.alg.name == cmp.alg.name && d.enc == cmp.enc
+	return d.alg == cmp.alg && d.enc == cmp.enc
 }
 
 // IsZero returns true if the digest has a zero value for the algorithm name and encoded value.
 func (d Digest) IsZero() bool {
-	return d.alg.name == "" && d.enc == ""
+	return d.alg == "" && d.enc == ""
 }
 
 // MarshalText returns the text encoding of the digest as a byte slice.
@@ -140,10 +142,10 @@ func (d Digest) MarshalText() (text []byte, err error) {
 // String returns the string encoding of the digest.
 // If the algorithm name or encoding value is the zero value, an empty string is returned.
 func (d Digest) String() string {
-	if d.alg.name == "" || d.enc == "" {
+	if d.alg == "" || d.enc == "" {
 		return ""
 	}
-	return fmt.Sprintf("%s:%s", d.alg.name, d.enc)
+	return fmt.Sprintf("%s:%s", d.alg, d.enc)
 }
 
 // UnmarshalText parses a given digest text with [Parse] and replaces the digest.

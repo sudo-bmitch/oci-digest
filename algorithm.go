@@ -109,6 +109,11 @@ func (a Algorithm) Encode(p []byte) (string, error) {
 	return a.enc.Encode(p)
 }
 
+// Equal returns true if the algorithms are the same.
+func (a Algorithm) Equal(cmp Algorithm) bool {
+	return a.name == cmp.name
+}
+
 // FromBytes generates a digest on the input byte slice using the algorithm and returns a [Digest].
 // This will fail if the algorithm is invalid.
 func (a Algorithm) FromBytes(p []byte) (Digest, error) {
@@ -148,6 +153,11 @@ func (a Algorithm) Hash() hash.Hash {
 		return nil
 	}
 	return a.newFn()
+}
+
+// IsZero returns true if the algorithm is the zero value.
+func (a Algorithm) IsZero() bool {
+	return a.name == ""
 }
 
 // Size returns the detected output byte size of the hash implementation.
