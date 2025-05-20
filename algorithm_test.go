@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"errors"
+	"fmt"
 	"hash"
 	"strings"
 	"testing"
@@ -178,6 +179,30 @@ func TestAlgorithmDigest(t *testing.T) {
 					t.Errorf("expected %s, received %s", tc.expect, out)
 				}
 			})
+			t.Run("encode", func(t *testing.T) {
+				hash := tc.a.Hash()
+				if tc.err != nil {
+					if hash != nil {
+						t.Errorf("expected nil hash, received interface")
+					}
+					return
+				}
+				if hash == nil {
+					t.Fatalf("hash interface is nil")
+				}
+				_, err := hash.Write([]byte(tc.in))
+				if err != nil {
+					t.Fatalf("hash write failed: %v", err)
+				}
+				enc, err := tc.a.Encode(hash.Sum(nil))
+				if err != nil {
+					t.Fatalf("unexpected encode err: %v", err)
+				}
+				out := fmt.Sprintf("%s:%s", tc.a.String(), enc)
+				if out != tc.expect {
+					t.Errorf("expected %s, received %s", tc.expect, out)
+				}
+			})
 			t.Run("fromBytes", func(t *testing.T) {
 				d, err := tc.a.FromBytes([]byte(tc.in))
 				if tc.err != nil {
@@ -230,6 +255,44 @@ func TestAlgorithmDigest(t *testing.T) {
 	}
 }
 
+func TestAlgorithmEqual(t *testing.T) {
+	tt := []struct {
+		name   string
+		a, b   Algorithm
+		expect bool
+	}{
+		{
+			name:   "undef",
+			expect: true,
+		},
+		{
+			name:   "sha256-undef",
+			a:      SHA256,
+			expect: false,
+		},
+		{
+			name:   "sha256-sha256",
+			a:      SHA256,
+			b:      Algorithm{name: "sha256"},
+			expect: true,
+		},
+		{
+			name:   "sha256-sha512",
+			a:      SHA256,
+			b:      SHA512,
+			expect: false,
+		},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			result := tc.a.Equal(tc.b)
+			if result != tc.expect {
+				t.Errorf("expected %t, received %t", tc.expect, result)
+			}
+		})
+	}
+}
+
 func TestAlgorithmHash(t *testing.T) {
 	tt := []struct {
 		name  string
@@ -267,6 +330,37 @@ func TestAlgorithmHash(t *testing.T) {
 			s := h.Size()
 			if s != tc.s {
 				t.Errorf("expected %d, received %d", tc.s, s)
+			}
+		})
+	}
+}
+
+func TestAlgorithmIsZero(t *testing.T) {
+	tt := []struct {
+		name   string
+		a      Algorithm
+		expect bool
+	}{
+		{
+			name:   "undef",
+			expect: true,
+		},
+		{
+			name:   "sha256",
+			a:      SHA256,
+			expect: false,
+		},
+		{
+			name:   "unset",
+			a:      Algorithm{},
+			expect: true,
+		},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			result := tc.a.IsZero()
+			if result != tc.expect {
+				t.Errorf("expected %t, received %t", tc.expect, result)
 			}
 		})
 	}
