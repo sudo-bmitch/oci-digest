@@ -22,10 +22,12 @@ func NewWriter(w io.Writer, alg Algorithm) Writer {
 		w:   w,
 		alg: alg,
 	}
-	if alg.name == "" || alg.newFn == nil {
+	ai, _, err := algorithmInfoLookup(alg.name)
+	if err != nil {
 		ret.alg = Canonical
+		ai = aiCanonical
 	}
-	ret.hash = ret.alg.newFn()
+	ret.hash = ai.newFn()
 	return ret
 }
 

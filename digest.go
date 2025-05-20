@@ -23,13 +23,14 @@ var (
 // NewDigest creates a [Digest] from an algorithm and the associated [hash.Hash].
 // This will fail if the algorithm is not valid or the hash does not match.
 func NewDigest(alg Algorithm, h hash.Hash) (Digest, error) {
-	if err := alg.validate(); err != nil {
+	ai, _, err := algorithmInfoLookup(alg.name)
+	if err != nil {
 		return Digest{}, err
 	}
-	if h == nil || h.Size() != alg.size {
+	if h == nil || h.Size() != ai.size {
 		return Digest{}, ErrHashInterfaceInvalid
 	}
-	enc, err := alg.enc.Encode(h.Sum(nil))
+	enc, err := ai.enc.Encode(h.Sum(nil))
 	if err != nil {
 		return Digest{}, err
 	}
@@ -42,10 +43,11 @@ func NewDigest(alg Algorithm, h hash.Hash) (Digest, error) {
 // NewDigestFromEncoded creates a [Digest] from an algorithm and the already encoded string.
 // This will fail if the algorithm is not valid or the encoding does not match the algorithm requirements.
 func NewDigestFromEncoded(alg Algorithm, encoded string) (Digest, error) {
-	if err := alg.validate(); err != nil {
+	ai, _, err := algorithmInfoLookup(alg.name)
+	if err != nil {
 		return Digest{}, err
 	}
-	if !alg.enc.Validate(encoded) {
+	if !ai.enc.Validate(encoded) {
 		return Digest{}, fmt.Errorf("%w: %s", ErrEncodingInvalid, encoded)
 	}
 	return Digest{
@@ -81,24 +83,22 @@ func Parse(s string) (Digest, error) {
 	if !ok {
 		return Digest{}, fmt.Errorf("%w: %s", ErrDigestInvalid, s)
 	}
-	alg, err := AlgorithmLookup(algPart)
+	ai, _, err := algorithmInfoLookup(algPart)
 	if err != nil {
 		return Digest{}, err
 	}
-	if alg.enc == nil || !alg.enc.Validate(encPart) {
+	if ai.enc == nil || !ai.enc.Validate(encPart) {
 		return Digest{}, fmt.Errorf("%w: %s", ErrEncodingInvalid, encPart)
 	}
 	return Digest{
-		alg: alg.name,
+		alg: algPart,
 		enc: encPart,
 	}, nil
 }
 
 // Algorithm returns the [Algorithm] portion of the digest.
 func (d Digest) Algorithm() Algorithm {
-	alg, _ := AlgorithmLookup(d.alg)
-	// any lookup failure will return a zero value
-	return alg
+	return Algorithm{name: d.alg}
 }
 
 // AppendText is used to output the current value of the digest to the byte slice.

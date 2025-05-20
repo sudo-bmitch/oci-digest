@@ -21,10 +21,12 @@ func NewReader(r io.Reader, alg Algorithm) Reader {
 		r:   r,
 		alg: alg,
 	}
-	if alg.name == "" || alg.newFn == nil {
+	ai, _, err := algorithmInfoLookup(alg.name)
+	if err != nil {
 		ret.alg = Canonical
+		ai = aiCanonical
 	}
-	ret.hash = ret.alg.newFn()
+	ret.hash = ai.newFn()
 	return ret
 }
 
