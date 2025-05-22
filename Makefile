@@ -31,6 +31,14 @@ vet: ## go vet
 test: ## go test
 	go test -cover -race ./...
 
+.PHONY: test-benchmark
+test-benchmark: go.work ## run benchmark tests
+	go test -bench=. -benchmem ./testing/
+
+.PHONY: test-fuzz
+test-fuzz: go.work ## run fuzz tests
+	go test -fuzz=. -fuzztime=5m ./testing/
+
 .PHONY: lint
 lint: lint-go lint-goimports lint-md ## Run all linting
 
@@ -49,6 +57,13 @@ lint-goimports: $(GOPATH)/bin/goimports
 lint-md: .FORCE ## Run linting for markdown
 	docker run --rm -v "$(PWD):/workdir:ro" davidanson/markdownlint-cli2:$(MARKDOWN_LINT_VER) \
 	  "**/*.md" "#vendor"
+
+.PHONY: clean
+clean:
+	[ ! -f go.work ] || rm go.work
+
+go.work:
+	go work init . ./testing
 
 $(GOPATH)/bin/goimports: .FORCE
 	@[ -f "$(GOPATH)/bin/goimports" ] \
