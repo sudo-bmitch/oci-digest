@@ -1,6 +1,6 @@
-{"name":"gha-uses-commit","key":"https://github.com/actions/checkout.git:v5.0.0","version":"08c6903cd8c0fde910a37f88322edcfb5dd907a8"}
-{"name":"gha-uses-commit","key":"https://github.com/actions/setup-go.git:v6.0.0","version":"44694675825211faa026b3c33043df3e48a5fa00"}
-{"name":"gha-uses-semver","key":"https://github.com/actions/checkout.git","version":"v5.0.0"}
-{"name":"gha-uses-semver","key":"https://github.com/actions/setup-go.git","version":"v6.0.0"}
-{"name":"makefile-markdown-lint","key":"docker.io/davidanson/markdownlint-cli2","version":"v0.19.0"}
+{"name":"gha-uses-commit","key":"https://github.com/actions/checkout.git:v6.0.0","version":"1af3b93b6815bc44a9784bd300feb67ff0d1eeb3"}
+{"name":"gha-uses-commit","key":"https://github.com/actions/setup-go.git:v6.1.0","version":"4dc6199c7b1a012772edbd06daecab0f50c9053c"}
+{"name":"gha-uses-semver","key":"https://github.com/actions/checkout.git","version":"v6.0.0"}
+{"name":"gha-uses-semver","key":"https://github.com/actions/setup-go.git","version":"v6.1.0"}
+{"name":"makefile-markdown-lint","key":"docker.io/davidanson/markdownlint-cli2","version":"v0.19.1"}
 {"name":"makefile-staticcheck","key":"https://github.com/dominikh/go-tools.git","version":"v0.6.1"}
