@@ -30,8 +30,8 @@ jobs:
     - name: "Set up Go ${{ matrix.gover }}"
       uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
       with:
-        go-version: ${{ matrix.go != 'go.mod' && matrix.go || null }}
-        go-version-file: ${{ matrix.go == 'go.mod' && 'go.mod' || null }}
+        go-version: ${{ matrix.gover != 'go.mod' && matrix.gover || null }}
+        go-version-file: ${{ matrix.gover == 'go.mod' && 'go.mod' || null }}
         check-latest: true
       id: go
 
