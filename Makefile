@@ -1,5 +1,5 @@
 GOPATH?=$(shell go env GOPATH)
-MARKDOWN_LINT_VER?=v0.20.0
+MARKDOWN_LINT_VER?=v0.21.0
 STATICCHECK_VER?=v0.7.0
 VER_BUMP?=$(shell command -v version-bump 2>/dev/null)
 VER_BUMP_CONTAINER?=sudobmitch/version-bump:edge
