@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Copyright the oci-digest contributors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# all lists use a `-`
-MD004:
-  style: dash
+rc=0
+for file in $(git ls-files -- '*.go' '*.sh' '*.yml'); do
+  if ! grep -iq "copyright the oci-digest contributors" "${file}"; then
+    echo "Missing copyright comment: ${file}" >&2
+	 rc=1
+  fi
+done
 
-# allow tabs in code blocks (for Go)
-MD010:
-  code_blocks: false
-
-# disable line length, prefer one sentence per line for PRs
-MD013: false
-
-# emphasis with underscore (`_emphasis_`)
-MD049:
-  style: "underscore"
-
-# bold with asterisk (`**bold**`)
-MD050:
-  style: "asterisk"
-    
+exit ${rc}
