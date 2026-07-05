@@ -14,7 +14,7 @@
 
 GOPATH?=$(shell go env GOPATH)
 GOFUMPT_VER?=v0.10.0
-MARKDOWN_LINT_VER?=v0.22.1
+MARKDOWN_LINT_VER?=v0.23.0
 STATICCHECK_VER?=v0.7.0
 VER_BUMP?=$(shell command -v version-bump 2>/dev/null)
 VER_BUMP_CONTAINER?=sudobmitch/version-bump:edge
