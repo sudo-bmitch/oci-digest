@@ -13,8 +13,8 @@
 # limitations under the License.
 
 GOPATH?=$(shell go env GOPATH)
-GOFUMPT_VER?=v0.10.0
-MARKDOWN_LINT_VER?=v0.23.1
+GOFUMPT_VER?=v0.11.0
+MARKDOWN_LINT_VER?=v0.23.2
 STATICCHECK_VER?=v0.7.0
 VER_BUMP?=$(shell command -v version-bump 2>/dev/null)
 VER_BUMP_CONTAINER?=sudobmitch/version-bump:edge
