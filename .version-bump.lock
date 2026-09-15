@@ -2,6 +2,6 @@
 {"name":"gha-uses-commit","key":"https://github.com/actions/setup-go.git:v7.0.0","version":"b7ad1dad31e06c5925ef5d2fc7ad053ef454303e"}
 {"name":"gha-uses-semver","key":"https://github.com/actions/checkout.git","version":"v7.0.1"}
 {"name":"gha-uses-semver","key":"https://github.com/actions/setup-go.git","version":"v7.0.0"}
-{"name":"makefile-gofumpt","key":"https://github.com/mvdan/gofumpt.git","version":"v0.11.0"}
+{"name":"makefile-gofumpt","key":"https://github.com/mvdan/gofumpt.git","version":"v0.12.0"}
 {"name":"makefile-markdown-lint","key":"docker.io/davidanson/markdownlint-cli2","version":"v0.23.2"}
 {"name":"makefile-staticcheck","key":"https://github.com/dominikh/go-tools.git","version":"v0.8.1"}
